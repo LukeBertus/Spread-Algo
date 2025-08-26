@@ -1,0 +1,9 @@
+# Requirements for the trading game
+
+# Core dependencies
+numpy>=1.19.0
+pandas>=1.2.0
+matplotlib>=3.3.0
+
+# For building distribution (developers only)
+pyarmor>=8.0.0
