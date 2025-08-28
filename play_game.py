@@ -43,7 +43,7 @@ num_timestamps = 20000
 0
 your_pnl = run_game(player_bot, num_timestamps, products)
 
-print(your_pnl)
+print(f"PNL: {your_pnl:.4f}")
 
 
 # Save data to csv after completion

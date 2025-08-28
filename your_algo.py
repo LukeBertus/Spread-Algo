@@ -193,6 +193,7 @@ class PlayerAlgorithm:
             adjustment = (adjusted_spread - quoted_spread) / 2
             desired_bid -= adjustment
             desired_ask += adjustment
+            # Store data for analysis
             self.data.append({'best_bid': best_bid, 'best_ask': best_ask, 'mid': mid, 'spread': spread, 'desired_bid': desired_bid, 'desired_ask': desired_ask, 'adjusted_spread': adjusted_spread, 'spread_adjustment_factor': spread_adjustment_factor})
 
             max_bid = best_ask - mpv  # below best ask
