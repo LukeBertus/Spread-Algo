@@ -38,12 +38,16 @@ uec = Product("UEC", mpv=0.1, pos_limit=200, fine=20)
 
 products = [uec]
 
+
+
 player_bot = PlayerAlgorithm(products)
 num_timestamps = 20000
 0
 your_pnl = run_game(player_bot, num_timestamps, products)
 
-print(f"PNL: {your_pnl:.4f}")
+pnl = player_bot.positions["Cash"]
+
+print(f"OLD: {your_pnl:.4f} NEW: {pnl:.4f}")
 
 
 # Save data to csv after completion

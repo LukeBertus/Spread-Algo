@@ -6,7 +6,7 @@ import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from statistics import mean, median, pstdev
 
-CORES = 12  # set to your logical core count
+CORES = 10  # set to your logical core count
 PROJECT_DIR = os.path.dirname(__file__)
 PLAY_GAME = os.path.join(PROJECT_DIR, "play_game.py")
 RUNS_ROOT = os.path.join(PROJECT_DIR, "batch_runs")
@@ -56,16 +56,14 @@ def run_once(idx: int) -> float | None:
     print(f"[Run {idx}] PNL = {pnl:.4f}")
     return pnl
 
-if __name__ == "__main__":
+def run_batch() -> tuple[list[float], float, float, float]:
     results: list[float] = []
-
     with ThreadPoolExecutor(max_workers=CORES) as ex:
         futures = [ex.submit(run_once, i) for i in range(CORES)]
         for fut in as_completed(futures):
             val = fut.result()
             if val is not None:
                 results.append(val)
-
     if results:
         avg = mean(results)
         med = median(results)
@@ -74,5 +72,24 @@ if __name__ == "__main__":
         print(f"Average PNL: {avg:.4f}")
         print(f"Median  PNL: {med:.4f}")
         print(f"Stdev   PNL: {sd:.4f}")
+        return results, avg, med, sd
     else:
         print("All runs failed or produced no PNL.")
+        return [], float("nan"), float("nan"), float("nan")
+
+if __name__ == "__main__":
+    BATCHES = 10  # repeat the whole process N times
+    batch_avgs: list[float] = []
+    for b in range(1, BATCHES + 1):
+        print(f"\n===== Batch {b}/{BATCHES} =====")
+        _, avg, _, _ = run_batch()
+        if not (avg != avg):  # filter NaN
+            batch_avgs.append(avg)
+
+    if batch_avgs:
+        overall_avg = mean(batch_avgs)
+        overall_med = median(batch_avgs)
+        print(f"\nOverall average of batch averages ({len(batch_avgs)} batches): {overall_avg:.4f}")
+        print(f"Overall median  of batch averages ({len(batch_avgs)} batches): {overall_med:.4f}")
+    else:
+        print("\nNo successful batches.")

@@ -16,7 +16,7 @@ class PlayerAlgorithm:
 
     # Tunables - keep adjusting to get better pnl
     # (I havent tested any iteration besides these parameters which gpt told me were good start)
-    BASE_SIZE = 20                 # how much we quote per side per turn
+    BASE_SIZE = 100                 # how much we quote per side per turn
     IMPROVE_TICKS = 0             # step inside book by min amount to get better priority 
     MAX_SKEW_TICKS = 4            # Risk control- if algo says quote 8 ticks down we cap it at 5
     INV_SKEW_DIVISOR = 200        # how much we skew is = position / INV_SKEW_DIVISOR
@@ -27,7 +27,7 @@ class PlayerAlgorithm:
 
     SPREAD_LOOK_BACK = 1           # compare current spread to spread this many timestamps ago
     SPREAD_STRETCH_RATIO = 20      # strength of spread adjustment (adj = 1 + spread_change / this_ratio) i.e. higher ratio = less adjustment
-    SPREAD_STRONG_THRESHOLD = 0    # if spread change less than this ignore it
+    SPREAD_STRONG_THRESHOLD = 1    # if spread change less than this ignore it
     SPREAD_ADJUSTMENT_MAX = 1      # max we can stretch the spread by
     SPREAD_ADJUSTMENT_MIN = 1      # min we can compress the spread by
 
@@ -36,6 +36,9 @@ class PlayerAlgorithm:
         self.name = "tt3"            
         self.team_members = ["Theo, Luke"]   
         self.timestamp_num = 0
+
+        self.positions["Cash"] = 0
+        self.mapping = {"Buy": 1, "Sell": -1}
 
         # State
         self.pos: Dict[str, int] = {p.ticker: 0 for p in products} # start with 0 position
@@ -107,6 +110,14 @@ class PlayerAlgorithm:
         Based on whether we were aggressor or resting side.
         -> flow counts net agg volume direction across ALL trades in the turn
         """
+        for trade in trades:
+            if trade.agg_bot == self.name:
+                self.positions[trade.ticker] += trade.size * self.mapping[trade.agg_dir]
+                self.positions["Cash"] -= trade.size * trade.price * self.mapping[trade.agg_dir]
+            elif trade.rest_bot == self.name:
+                self.positions[trade.ticker] -= trade.size * self.mapping[trade.agg_dir]  
+                self.positions["Cash"] += trade.size * trade.price * self.mapping[trade.agg_dir]
+
         flow = 0  # +ve if net aggressive BUY, -ve if net aggressive SELL
         for tr in trades:
             # Track position for our bot
@@ -120,7 +131,7 @@ class PlayerAlgorithm:
                 if tr.agg_dir == "Buy":
                     self.pos[tr.ticker] -= tr.size  # we sold to them
                 else:
-                    self.pos[tr.ticker] += tr.size  # we bought
+                    self.pos[tr.ticker] += tr.size  # we boughts
 
             # net flow for all trades
             flow += tr.size if tr.agg_dir == "Buy" else -tr.size
