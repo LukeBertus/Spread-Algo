@@ -3,20 +3,9 @@ from typing import List, Dict, Optional
 import math
 
 class PlayerAlgorithm:
-    """
-    Currently tracks position and order flow
-    Set to quote both sides near the top of the order book
-    Cancels and requotes every turn 
-    Quotes based on how much inventory we hold currently (INV_SKEW_DIVISOR)
-    - If we hold too many units and price drops we lose a lot
-    - so skew prices to encourage trading in opposite direction
-    - if long, lower buy price and raise sell price and vice versa
-    Also quotes based on flow - people selling or buying more (FLOW TICKS + THRESHOLD)
-    """
 
     # Tunables - keep adjusting to get better pnl
-    # (I havent tested any iteration besides these parameters which gpt told me were good start)
-    BASE_SIZE = 100                 # how much we quote per side per turn
+    BASE_SIZE = 150                 # how much we quote per side per turn
     IMPROVE_TICKS = 0             # step inside book by min amount to get better priority 
     MAX_SKEW_TICKS = 4            # Risk control- if algo says quote 8 ticks down we cap it at 5
     INV_SKEW_DIVISOR = 200        # how much we skew is = position / INV_SKEW_DIVISOR
