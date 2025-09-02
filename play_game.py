@@ -45,9 +45,9 @@ num_timestamps = 20000
 0
 your_pnl = run_game(player_bot, num_timestamps, products)
 
-pnl = player_bot.positions["Cash"]
 
-print(f"OLD: {your_pnl:.4f} NEW: {pnl:.4f}")
+
+print(f"PNL: {your_pnl:.4f}")
 
 
 # Save data to csv after completion

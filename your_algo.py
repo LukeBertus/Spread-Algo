@@ -37,9 +37,6 @@ class PlayerAlgorithm:
         self.team_members = ["Theo, Luke"]   
         self.timestamp_num = 0
 
-        self.positions["Cash"] = 0
-        self.mapping = {"Buy": 1, "Sell": -1}
-
         # State
         self.pos: Dict[str, int] = {p.ticker: 0 for p in products} # start with 0 position
         self.last_mid: Dict[str, Optional[float]] = {p.ticker: None for p in products} # remember last mid
@@ -110,14 +107,7 @@ class PlayerAlgorithm:
         Based on whether we were aggressor or resting side.
         -> flow counts net agg volume direction across ALL trades in the turn
         """
-        for trade in trades:
-            if trade.agg_bot == self.name:
-                self.positions[trade.ticker] += trade.size * self.mapping[trade.agg_dir]
-                self.positions["Cash"] -= trade.size * trade.price * self.mapping[trade.agg_dir]
-            elif trade.rest_bot == self.name:
-                self.positions[trade.ticker] -= trade.size * self.mapping[trade.agg_dir]  
-                self.positions["Cash"] += trade.size * trade.price * self.mapping[trade.agg_dir]
-
+        
         flow = 0  # +ve if net aggressive BUY, -ve if net aggressive SELL
         for tr in trades:
             # Track position for our bot
@@ -131,7 +121,7 @@ class PlayerAlgorithm:
                 if tr.agg_dir == "Buy":
                     self.pos[tr.ticker] -= tr.size  # we sold to them
                 else:
-                    self.pos[tr.ticker] += tr.size  # we boughts
+                    self.pos[tr.ticker] += tr.size  # we bought
 
             # net flow for all trades
             flow += tr.size if tr.agg_dir == "Buy" else -tr.size
